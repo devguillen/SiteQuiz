@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+if (!isset($_SESSION['usuario_id'])) {
+    header('Location: formlogin.php');
+    exit;
+}
+
 require_once 'conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -32,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
