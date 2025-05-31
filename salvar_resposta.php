@@ -1,5 +1,13 @@
 <?php
 session_start();
+if (session_status() === PHP_SESSION_ACTIVE) {
+    echo "Sessão ativa<br>";
+} else {
+    echo "Sessão não está ativa<br>";
+}
+
+var_dump($_SESSION);
+
 require_once 'conexao.php';
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -8,10 +16,15 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
+var_dump($_SESSION['usuario_id']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario_id = $_SESSION['usuario_id'];
     $pergunta_id = $_POST['pergunta_id'] ?? null;
     $resposta = $_POST['resposta'] ?? null;
+
+    var_dump($pergunta_id);
+var_dump($resposta);
 
     if ($pergunta_id && $resposta) {
         $query = "INSERT INTO respostas (usuario_id, pergunta_id, resposta) VALUES (?, ?, ?)";
@@ -42,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>Responda a Pergunta</h1>
     <form action="salvar_resposta.php" method="POST">
         <!-- Campo oculto para enviar o ID da pergunta -->
-        <input type="hidden" name="pergunta_id" value="1">
+        <input type="hidden" name="pergunta_id" value="15">
         
         <p>Escolha sua resposta:</p>
         <input type="radio" name="resposta" value="A" id="A">

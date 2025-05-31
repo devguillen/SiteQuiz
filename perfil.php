@@ -2,8 +2,11 @@
 session_start();
 require_once 'conexao.php';
 
-// Função para calcular o tempo desde a criação da conta e retornar string amigável
+// Função para calcular tempo desde criação da conta, tratando valor nulo
 function tempoDesdeCriacao($dataCriacaoStr) {
+    if (!$dataCriacaoStr) {
+        return "data de criação desconhecida";
+    }
     $dataCriacao = new DateTime($dataCriacaoStr);
     $agora = new DateTime();
     $intervalo = $dataCriacao->diff($agora);
@@ -24,13 +27,14 @@ function tempoDesdeCriacao($dataCriacaoStr) {
     return trim($tempoCriacao);
 }
 
-// Verifica se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.html');
     exit;
 }
 
 $usuario_id = $_SESSION['usuario_id'];
+
+// Buscar dados do usuário
 $query = "SELECT * FROM usuarios WHERE id = ?";
 $stmt = $conexao->prepare($query);
 $stmt->bind_param("i", $usuario_id);
@@ -43,35 +47,51 @@ if (!$usuario) {
     exit;
 }
 
-// Consulta para obter as perguntas respondidas pelo usuário
+// Buscar respostas dadas pelo usuário junto com a pergunta
 $query_respostas = "
     SELECT p.enunciado, p.resposta_correta, r.resposta
     FROM respostas r
     JOIN perguntas p ON r.pergunta_id = p.id
     WHERE r.usuario_id = ?
+    ORDER BY r.id DESC
 ";
 $stmt_respostas = $conexao->prepare($query_respostas);
 $stmt_respostas->bind_param("i", $usuario_id);
 $stmt_respostas->execute();
 $respostas_result = $stmt_respostas->get_result();
 
-$mensagem = "";
-$erro = "";
+// Estatísticas básicas
+$total = 0;
+$acertos = 0;
+$erros = 0;
 
-// Processar atualização do perfil
+$respostas = [];
+while ($linha = $respostas_result->fetch_assoc()) {
+    $total++;
+    // Comparar respostas ignorando maiúsculas/minúsculas e espaços
+    if (strtolower(trim($linha['resposta'])) === strtolower(trim($linha['resposta_correta']))) {
+        $acertos++;
+    } else {
+        $erros++;
+    }
+    $respostas[] = $linha;
+}
+
+$percentual_acertos = $total > 0 ? round(($acertos / $total) * 100, 2) : 0;
+
+$mensagem = "";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['atualizar_perfil'])) {
     $nome = trim($_POST['nome']);
     $email = trim($_POST['email']);
     $senha = $_POST['senha'];
     $confirma_senha = $_POST['confirma_senha'];
 
-    // Validação simples
     if ($nome === "" || $email === "") {
         $mensagem = "<div class='msg-erro'>Nome e email não podem ficar vazios.</div>";
     } elseif ($senha !== "" && $senha !== $confirma_senha) {
         $mensagem = "<div class='msg-erro'>As senhas não coincidem.</div>";
     } else {
-        // Verificar se o email é único (se mudou)
         if ($email !== $usuario['email']) {
             $verificaEmail = $conexao->prepare("SELECT id FROM usuarios WHERE email = ? AND id != ?");
             $verificaEmail->bind_param("si", $email, $usuario_id);
@@ -83,20 +103,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['atualizar_perfil'])) 
         }
 
         if ($mensagem === "") {
-            // Atualizar senha se fornecida
             if ($senha !== "") {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $atualiza = $conexao->prepare("UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?");
                 $atualiza->bind_param("sssi", $nome, $email, $senhaHash, $usuario_id);
             } else {
-                // Sem alterar senha
                 $atualiza = $conexao->prepare("UPDATE usuarios SET nome = ?, email = ? WHERE id = ?");
                 $atualiza->bind_param("ssi", $nome, $email, $usuario_id);
             }
 
             if ($atualiza->execute()) {
                 $mensagem = "<div class='msg-sucesso'>Perfil atualizado com sucesso!</div>";
-                // Atualiza dados da sessão e variável usuário para refletir mudanças
                 $_SESSION['usuario_nome'] = $nome;
                 $usuario['nome'] = $nome;
                 $usuario['email'] = $email;
@@ -115,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['atualizar_perfil'])) 
     <title>Perfil - QAPnaProva</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-        /* Tema escuro sóbrio */
+        /* seu CSS existente aqui */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
@@ -124,19 +141,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['atualizar_perfil'])) 
             padding: 20px;
             transition: background-color 0.5s ease, color 0.5s ease;
         }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background-color: #1f1f1f;
-            padding: 30px 40px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            animation: fadeIn 0.7s ease forwards;
+.container {
+    max-width: 1200px; /* ou até mais: 1400px */
+    margin: auto;
+    background-color: #1f1f1f;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    animation: fadeIn 0.7s ease forwards;
+}
         }
         h1, h2 {
             color: #ccc;
             margin-bottom: 15px;
-            /* sem texto neon */
             text-shadow: none;
         }
         .info {
@@ -236,83 +253,145 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['atualizar_perfil'])) 
             color: #d9534f;
             font-weight: bold;
         }
-        .btn-voltar {
-            display: inline-block;
-            margin-top: 30px;
-            background: #555;
-            color: #ddd;
-            padding: 14px 30px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            box-shadow: none;
-            transition: background-color 0.3s ease;
-            animation: none;
-        }
-        .btn-voltar:hover {
-            background-color: #777;
-        }
-        /* Animações simples */
         @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(20px);}
-            to {opacity: 1; transform: translateY(0);}
+            from {opacity: 0;}
+            to {opacity: 1;}
         }
+.btn {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #2980b9;
+}
+
+.campo-pesquisa {
+    padding: 8px;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.acertou {
+    color: green;
+    font-weight: bold;
+}
+
+.errou {
+    color: red;
+    font-weight: bold;
+}
+
     </style>
 </head>
 <body>
+    <a href="index.php" style="
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+">← Voltar</a>
     <div class="container">
-        <h1>Perfil de <?= htmlspecialchars($usuario['nome']) ?></h1>
-        <p class="info"><strong>Email:</strong> <?= htmlspecialchars($usuario['email']) ?></p>
-        <p class="info"><strong>Conta criada há:</strong> <?= tempoDesdeCriacao($usuario['criado_em']) ?></p>
+        <h1>Olá, <?=htmlspecialchars($usuario['nome'])?></h1>
+<p>Bem-vindo ao seu perfil no <strong>QAPnaProva</strong>.</p>
 
-        <?php if ($mensagem): ?>
-            <div class="mensagem"><?= $mensagem ?></div>
-        <?php endif; ?>
-        <?php if ($erro): ?>
-            <div class="erro"><?= $erro ?></div>
-        <?php endif; ?>
+<div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; padding: 20px 0;">
 
-        <h2>Editar Perfil</h2>
-        <form method="post" action="perfil.php" autocomplete="off">
-            <input type="hidden" name="atualizar_perfil" value="1" />
-            <label for="nome">Nome:</label>
-            <input type="text" id="nome" name="nome" value="<?= htmlspecialchars($usuario['nome']) ?>" required>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" value="<?= htmlspecialchars($usuario['email']) ?>" required>
-
-            <label for="senha">Nova senha (deixe em branco para não alterar):</label>
-            <input type="password" id="senha" name="senha" autocomplete="new-password">
-
-            <label for="confirma_senha">Confirmar nova senha:</label>
-            <input type="password" id="confirma_senha" name="confirma_senha" autocomplete="new-password">
-
-            <button type="submit">Atualizar Perfil</button>
-        </form>
-
-        <h2>Perguntas Respondidas</h2>
-        <?php if ($respostas_result->num_rows === 0): ?>
-            <p>Você ainda não respondeu nenhuma pergunta.</p>
-        <?php else: ?>
-            <ul>
-                <?php while ($linha = $respostas_result->fetch_assoc()): ?>
-                    <li>
-                        <p><strong>Pergunta:</strong> <?= htmlspecialchars($linha['enunciado']) ?></p>
-                        <p><strong>Resposta Correta:</strong> <?= htmlspecialchars($linha['resposta_correta']) ?></p>
-                        <p><strong>Sua Resposta:</strong> <?= htmlspecialchars($linha['resposta']) ?></p>
-                        <p>Status: 
-                            <?php if ($linha['resposta'] === $linha['resposta_correta']): ?>
-                                <span class="acertou">Acertou</span>
-                            <?php else: ?>
-                                <span class="errou">Errou</span>
-                            <?php endif; ?>
-                        </p>
-                    </li>
-                <?php endwhile; ?>
-            </ul>
-        <?php endif; ?>
-
-        <a href="index.html" class="btn-voltar">Voltar para o Quiz</a>
+  <!-- Info + Gráfico -->
+  <div style="flex: 2; min-width: 400px;">
+    <div class="info">
+      <p><strong>Email:</strong> <?=htmlspecialchars($usuario['email'])?></p>
+      <p><strong>Conta criada há:</strong> <?=tempoDesdeCriacao($usuario['data_criacao'])?></p>
+      <p><strong>Você respondeu:</strong> <?=$total?> perguntas</p>
+      <p><strong>Acertou:</strong> <?=$acertos?> (<?=$percentual_acertos?>%)</p>
+      <p><strong>Errou:</strong> <?=$erros?></p>
     </div>
+
+    <div style="margin-top: 20px;">
+      <canvas id="graficoBarras" width="300" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Atualizar perfil -->
+  <div style="flex: 1; min-width: 300px;">
+    <p><strong>Atualizar Perfil</strong></p>
+    <?=$mensagem?>
+    <form method="post" action="">
+      <label for="nome">Nome:</label>
+      <input type="text" name="nome" id="nome" value="<?=htmlspecialchars($usuario['nome'])?>" required />
+
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email" value="<?=htmlspecialchars($usuario['email'])?>" required />
+
+      <label for="senha">Senha (deixe em branco para não alterar):</label>
+      <input type="password" name="senha" id="senha" />
+
+      <label for="confirma_senha">Confirme a senha:</label>
+      <input type="password" name="confirma_senha" id="confirma_senha" />
+
+      <button type="submit" name="atualizar_perfil">Atualizar Perfil</button>
+    </form>
+  </div>
+
+  <!-- Respostas -->
+  <div style="flex: 1; min-width: 300px;">
+    <h2>Suas respostas</h2>
+
+    <button id="mostrarRespostasBtn" class="btn">Mostrar perguntas respondidas</button>
+
+    <div id="respostasRespondidas" style="display: none; margin-top: 15px;">
+      <input type="text" id="pesquisaResposta" placeholder="Pesquisar resposta..." class="campo-pesquisa">
+      <ul>
+        <?php foreach ($respostas as $resposta): ?>
+          <li>
+            <strong>Pergunta:</strong> <?= html_entity_decode(strip_tags($resposta['enunciado'])) ?><br />
+            <strong>Resposta correta:</strong> <?= htmlspecialchars($resposta['resposta_correta']) ?><br />
+            <strong>Sua resposta:</strong> <?= htmlspecialchars($resposta['resposta']) ?><br />
+            <?php if (strtolower($resposta['resposta']) === strtolower($resposta['resposta_correta'])): ?>
+              <span class="acertou">Acertou</span>
+            <?php else: ?>
+              <span class="errou">Errou</span>
+            <?php endif; ?>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('mostrarRespostasBtn').addEventListener('click', function() {
+    const div = document.getElementById('respostasRespondidas');
+    div.style.display = div.style.display === 'none' ? 'block' : 'none';
+  });
+
+  const pesquisaInput = document.getElementById('pesquisaResposta');
+  pesquisaInput.addEventListener('keyup', function() {
+    const termo = pesquisaInput.value.toLowerCase();
+    document.querySelectorAll('#respostasRespondidas ul li').forEach(function(item) {
+      const texto = item.textContent.toLowerCase();
+      item.style.display = texto.includes(termo) ? '' : 'none';
+    });
+  });
+</script>
+
+
 </body>
 </html>

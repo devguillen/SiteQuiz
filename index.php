@@ -51,6 +51,7 @@ let respostaCorreta = "";
 let materiaSelecionada = "";
 let respostaConfirmada = false; // Flag para verificar se a resposta foi confirmada
 let perguntasRespondidas = []; // Array para armazenar IDs das perguntas respondidas
+let perguntaAtual = null; // Variável global para guardar a pergunta atual
 
 function verificarResposta() {
   const opcoes = document.getElementsByName("resposta");
@@ -83,15 +84,17 @@ function verificarResposta() {
   });
 
   respostaConfirmada = true; // Marca que a resposta foi confirmada
-  // Envia a resposta para salvar no banco de dados
-fetch('salvar_resposta.php', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  },
-  body: `pergunta_id=${encodeURIComponent(pergunta.id)}&resposta=${encodeURIComponent(selecionada)}`
-});
 
+  // Envia a resposta para salvar no banco de dados
+  if (perguntaAtual && perguntaAtual.id) {
+    fetch('salvar_resposta.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `pergunta_id=${encodeURIComponent(perguntaAtual.id)}&resposta=${encodeURIComponent(selecionada)}`
+    });
+  }
 
   // Remover a classe 'desativado' e permitir o clique no botão de mostrar solução
   document.getElementById("mostrar-solucao-btn").classList.remove("desativado");
@@ -130,6 +133,9 @@ function carregarPergunta() {
         // Marca a pergunta como respondida
         perguntasRespondidas.push(pergunta.id);
         respostaCorreta = pergunta.resposta_correta;
+
+        // Guarda a pergunta atual para usar no envio da resposta
+        perguntaAtual = pergunta;
 
         document.getElementById('enunciado').innerHTML = pergunta.enunciado;
 
