@@ -7,10 +7,7 @@ session_start();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login - QAPnaProva</title>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     * {
       box-sizing: border-box;
@@ -27,20 +24,36 @@ session_start();
       animation: fadeIn 0.8s ease-in-out;
     }
 
-    .login-container {
+    .wrapper {
+      display: flex;
+      width: 800px;
+      height: 500px;
       background: #1e1e1e;
-      padding: 40px;
       border-radius: 15px;
+      overflow: hidden;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
+    }
+
+    .form-section {
+      width: 50%;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       color: #fff;
+    }
+
+    .image-section {
+      width: 50%;
+      background-image: url('img/login.jpg');
+      background-size: cover;
+      background-position: center;
     }
 
     h2 {
       margin-bottom: 20px;
       color: #fff;
+      text-align: center;
     }
 
     input[type='text'],
@@ -80,6 +93,7 @@ session_start();
     .login-link {
       margin-top: 20px;
       font-size: 14px;
+      text-align: center;
       color: #ccc;
     }
 
@@ -94,6 +108,13 @@ session_start();
       color: #1c6c30;
     }
 
+    .error-message {
+      color: red;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -105,28 +126,42 @@ session_start();
       }
     }
 
-    .error-message {
-      color: red;
-      font-weight: bold;
-      margin-bottom: 15px;
+    @media (max-width: 900px) {
+      .wrapper {
+        flex-direction: column;
+        width: 90%;
+        height: auto;
+      }
+
+      .form-section, .image-section {
+        width: 100%;
+        height: 300px;
+      }
+
+      .image-section {
+        height: 250px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Login</h2>
-    <?php if (isset($_SESSION['erro_login'])): ?>
-      <p class="error-message"><?= htmlspecialchars($_SESSION['erro_login']) ?></p>
-      <?php unset($_SESSION['erro_login']); ?>
-    <?php endif; ?>
-    <form action="login.php" method="POST">
-      <input type="text" name="email" placeholder="E-mail" required />
-      <input type="password" name="senha" placeholder="Senha" required />
-      <button type="submit">Entrar</button>
-    </form>
-    <p class="login-link">
-      Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a>
-    </p>
+  <div class="wrapper">
+    <div class="form-section">
+      <h2>Login</h2>
+      <?php if (isset($_SESSION['erro_login'])): ?>
+        <p class="error-message"><?= htmlspecialchars($_SESSION['erro_login']) ?></p>
+        <?php unset($_SESSION['erro_login']); ?>
+      <?php endif; ?>
+      <form action="login.php" method="POST">
+        <input type="text" name="email" placeholder="E-mail" required />
+        <input type="password" name="senha" placeholder="Senha" required />
+        <button type="submit">Entrar</button>
+      </form>
+      <p class="login-link">
+        Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a>
+      </p>
+    </div>
+    <div class="image-section"></div>
   </div>
 </body>
 </html>
