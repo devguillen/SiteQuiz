@@ -42,10 +42,28 @@ session_start();
       justify-content: center;
       color: #fff;
     }
+    .forgot-password {
+  margin-top: 24px;
+  font-size: 14px;
+  color: #ccc;
+  text-align: center;
+}
+
+.forgot-password a {
+  color: #218838;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 5px;
+  transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+  color: #1c6c30;
+}
 
     .image-section {
       width: 50%;
-      background-image: url('img/login.jpg');
+      background-image: url('img/login1.jpg');
       background-size: cover;
       background-position: center;
     }
@@ -91,7 +109,7 @@ session_start();
     }
 
     .login-link {
-      margin-top: 20px;
+      margin-top: 10px;
       font-size: 14px;
       text-align: center;
       color: #ccc;
@@ -157,9 +175,14 @@ session_start();
         <input type="password" name="senha" placeholder="Senha" required />
         <button type="submit">Entrar</button>
       </form>
-      <p class="login-link">
-        Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a>
-      </p>
+      <p class="forgot-password">
+  Esqueceu a senha? <a href="recuperar_senha.php">Clique aqui</a>
+</p>
+
+<p class="login-link">
+  Ainda não tem conta? <a href="cadastro.html">Cadastre-se</a>
+</p>
+
     </div>
     <div class="image-section"></div>
   </div>
