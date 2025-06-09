@@ -1,13 +1,12 @@
 <?php
-$token = $_GET['token'] ?? '';
+// Formulário para usuário informar o email
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redefinir Senha</title>
+  <title>Recuperar Senha</title>
   <style>
     * {
       box-sizing: border-box;
@@ -24,7 +23,7 @@ $token = $_GET['token'] ?? '';
       animation: fadeIn 0.8s ease-in-out;
     }
 
-    .redefinir-container {
+    .recuperar-container {
       background: #1e1e1e;
       padding: 40px;
       border-radius: 15px;
@@ -40,7 +39,7 @@ $token = $_GET['token'] ?? '';
       color: #fff;
     }
 
-    input[type="password"] {
+    input[type="email"] {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
@@ -73,6 +72,23 @@ $token = $_GET['token'] ?? '';
       background-color: #1c6c30;
     }
 
+    .voltar-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .voltar-link a {
+      color: #218838;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s ease;
+    }
+
+    .voltar-link a:hover {
+      color: #1c6c30;
+    }
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -87,14 +103,13 @@ $token = $_GET['token'] ?? '';
 </head>
 <body>
 
-  <div class="redefinir-container">
-    <h2>Nova Senha</h2>
-    <form action="salvar_nova_senha.php" method="POST">
-      <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
-      <input type="password" name="nova_senha" placeholder="Digite a nova senha" required>
-      <input type="password" name="confirmar_senha" placeholder="Confirme a nova senha" required>
-      <button type="submit">Salvar nova senha</button>
+  <div class="recuperar-container">
+    <h2>Recuperar Senha</h2>
+    <form action="processa_recuperacao.php" method="POST">
+      <input type="email" name="email" placeholder="Digite seu e-mail" required>
+      <button type="submit">Enviar link de recuperação</button>
     </form>
+    <p class="voltar-link"><a href="formlogin.php">Voltar ao login</a></p>
   </div>
 
 </body>

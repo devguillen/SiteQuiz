@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -26,22 +27,23 @@
       border-radius: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.5);
       width: 100%;
-      max-width: 400px;
-      text-align: center;
+      max-width: 420px;
       color: #fff;
     }
 
     h2 {
-      margin-bottom: 20px;
-      color: #fff;
+      text-align: center;
+      margin-bottom: 25px;
     }
 
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-group input {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 12px 40px 12px 12px;
       border: 1px solid #444;
       background: #2c2c2c;
       color: #fff;
@@ -49,13 +51,22 @@
       transition: border-color 0.3s ease;
     }
 
-    input:focus {
-      border-color: #218838;
+    .input-group input:focus {
+      border-color: #28a745;
       outline: none;
     }
 
+    .input-group .material-icons {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      cursor: pointer;
+    }
+
     button {
-      background-color: #218838;
+      background-color: #28a745;
       color: white;
       padding: 12px;
       border: none;
@@ -63,7 +74,7 @@
       cursor: pointer;
       width: 100%;
       font-size: 16px;
-      margin-top: 15px;
+      margin-top: 10px;
       transition: background-color 0.3s ease;
     }
 
@@ -74,11 +85,12 @@
     .login-link {
       margin-top: 20px;
       font-size: 14px;
+      text-align: center;
       color: #ccc;
     }
 
     .login-link a {
-      color: #218838;
+      color: #28a745;
       text-decoration: none;
       font-weight: bold;
       transition: color 0.3s ease;
@@ -105,13 +117,36 @@
   <div class="cadastro-container">
     <h2>Crie sua conta</h2>
     <form action="registrar_usuario.php" method="POST">
-      <input type="text" name="nome" placeholder="Nome completo" required>
-      <input type="email" name="email" placeholder="E-mail" required>
-      <input type="password" name="senha" placeholder="Senha" required>
+      <div class="input-group">
+        <input type="text" name="nome" placeholder="Nome completo" required>
+        <span class="material-icons">person</span>
+      </div>
+      <div class="input-group">
+        <input type="email" name="email" placeholder="E-mail" required>
+        <span class="material-icons">email</span>
+      </div>
+      <div class="input-group">
+        <input type="password" name="senha" id="senha" placeholder="Senha" required>
+        <span class="material-icons" onclick="toggleSenha()">visibility</span>
+      </div>
       <button type="submit">Cadastrar</button>
     </form>
     <p class="login-link">Já tem cadastro? <a href="formlogin.php">Faça login</a></p>
   </div>
+
+  <script>
+    function toggleSenha() {
+      const input = document.getElementById("senha");
+      const icon = input.nextElementSibling;
+      if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "visibility_off";
+      } else {
+        input.type = "password";
+        icon.textContent = "visibility";
+      }
+    }
+  </script>
 
 </body>
 </html>

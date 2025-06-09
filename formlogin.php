@@ -176,7 +176,7 @@ session_start();
         <button type="submit">Entrar</button>
       </form>
       <p class="forgot-password">
-  Esqueceu a senha? <a href="recuperar_senha.php">Clique aqui</a>
+  Esqueceu a senha? <a href="esqueceu_senha.php">Clique aqui</a>
 </p>
 
 <p class="login-link">
