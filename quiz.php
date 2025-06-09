@@ -173,25 +173,24 @@ window.onload = () => {
   const materiaLinks = document.querySelectorAll('.materia-link');
 
   materiaLinks.forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
+  link.addEventListener('click', e => {
+    e.preventDefault();
 
-      const botaoClicado = e.target;
+    const botaoClicado = e.target;
 
-      // Ignora se já estiver desativado
-      if (botaoClicado.classList.contains('desativado')) return;
+    if (botaoClicado.classList.contains('desativado')) return;
 
-      materiaSelecionada = botaoClicado.dataset.materia;
+    materiaSelecionada = botaoClicado.dataset.materia;
 
-      // Remove classe 'desativado' de todos
-      materiaLinks.forEach(btn => btn.classList.remove('desativado'));
+    // Atualiza o título da matéria no h1 dinamicamente
+    document.getElementById("materia-titulo").textContent = materiaSelecionada;
 
-      // Adiciona a classe no botão clicado
-      botaoClicado.classList.add('desativado');
+    materiaLinks.forEach(btn => btn.classList.remove('desativado'));
+    botaoClicado.classList.add('desativado');
 
-      carregarPergunta();
-    });
+    carregarPergunta();
   });
+});
 };
 </script>
 </head>
@@ -225,16 +224,22 @@ window.onload = () => {
 
   <!-- Conteúdo Principal -->
   <div class="container">
-  <h1 style="color: #28a745;">Perguntas - QAPNAPROVA</h1>
+  <h1 style="color: #28a745;">Perguntas - <span id="materia-titulo" class="titulo-materia">QAPNAPROVA</span></h1>
 
     <div id="pergunta" class="pergunta fade">
       <h3 id="enunciado"></h3>
 
       <div id="alternativas" class="alternativas"></div>
+      <div style="display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+  <div>
+    <button onclick="verificarResposta()">Confirmar Resposta</button>
+    <button id="mostrar-solucao-btn" onclick="mostrarSolucao()" class="desativado" disabled>Mostrar Solução</button>
+  </div>
+  <div style="margin-left: auto;">
+    <button onclick="carregarPergunta()">Próxima Pergunta</button>
+  </div>
+</div>
 
-      <button onclick="verificarResposta()">Confirmar Resposta</button>
-      <button id="mostrar-solucao-btn" onclick="mostrarSolucao()" class="desativado" disabled>Mostrar Solução</button>
-<button onclick="carregarPergunta()">Próxima Pergunta</button>
 
 
       <div id="feedback" class="resposta" style="display:none;"></div>
