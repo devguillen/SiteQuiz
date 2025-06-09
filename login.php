@@ -27,8 +27,8 @@ if ($resultado->num_rows > 0) {
         $_SESSION['usuario_email'] = $usuario['email'];
         $_SESSION['usuario_tipo'] = $usuario['tipo'];
 
-        // Redireciona para index.php após login bem sucedido
-        header('Location: index.php');
+        // Redireciona para quiz.php após login bem sucedido
+        header('Location: quiz.php');
         exit;
     } else {
         // Senha incorreta

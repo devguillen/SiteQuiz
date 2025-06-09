@@ -145,7 +145,7 @@ ul li.show { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
-<a href="index.php" class="btnvoltar">Voltar</a>
+<a href="quiz.php" class="btnvoltar">Voltar</a>
 <div class="container">
 <h1>Olá, <?=htmlspecialchars($usuario['nome'])?></h1>
 <p>Email: <?=htmlspecialchars($usuario['email'])?></p>

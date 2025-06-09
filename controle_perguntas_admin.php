@@ -226,7 +226,7 @@ $result = $stmt->get_result();
 </head>
 <nav class="navbar">
   <div class="logo">
-    <a href="index.php">QAPnaProva</a>
+    <a href="quiz.php">QAPnaProva</a>
   </div>
 
   <ul class="nav-links">
